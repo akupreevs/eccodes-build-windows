@@ -3,20 +3,20 @@
 #      general configuration      #
 #---------------------------------#
 
-version: 2.13.1-{build}
+version: 2.37.0-{build}
 
 branches:
   only:
     - master
 
-image: Visual Studio 2017
+image: Visual Studio 2019
 
 environment:
-  CONDA: c:\Miniconda37-x64
+  CONDA: c:\Miniconda38-x64
   INSTALL_DIR: c:\ECMWF
 
-  SOURCE_DIRECTORY: eccodes-2.13.1-Source
-  SOURCE_TAR: https://confluence.ecmwf.int/download/attachments/45757960/eccodes-2.13.1-Source.tar.gz?api=v2
+  SOURCE_DIRECTORY: eccodes-2.37.0-Source
+  SOURCE_TAR: https://github.com/ecmwf/eccodes/archive/refs/tags/2.37.0.tar.gz
 
 # scripts that are called at very beginning, before repo cloning
 init:
@@ -45,7 +45,7 @@ install:
   - cmd: conda install libpng openjpeg
 
 before_build:
-  - cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+  - cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
 
 build_script:
   - cmd: cd %SOURCE_DIRECTORY%
@@ -53,9 +53,9 @@ build_script:
   - cmd: cmake -G "NMake Makefiles" ^
       -D CMAKE_INSTALL_PREFIX=%INSTALL_DIR% ^
       -D CMAKE_BUILD_TYPE=Release ^
-      -D ENABLE_FORTRAN=0 ^
-      -D ENABLE_PYTHON=0 ^
-      -D ENABLE_NETCDF=0 ^
+      -D ENABLE_FORTRAN=1 ^
+      -D ENABLE_PYTHON=1 ^
+      -D ENABLE_NETCDF=1 ^
       -D ENABLE_PNG=1 ^
       -D ENABLE_JPG=1 ^
       -D OPENJPEG_INCLUDE_DIR=%CONDA%\Library\include\openjpeg-2.3 ^
