@@ -1,11 +1,12 @@
 # These are executed in Windows PowerShell - it's a copy from another fork https://github.com/mborsetti/eccodes-windows/blob/main/.github/workflows/ci.yml
 
-name: CI
+name: Build eccodes
 
 on:
   push:
     branches:
-      - main
+      - master
+  workflow_dispatch:
 
 jobs:
   build:
