@@ -1,0 +1,153 @@
+# These are executed in Windows PowerShell - it's a copy from another fork https://github.com/mborsetti/eccodes-windows/blob/main/.github/workflows/ci.yml
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    # run on latest https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md
+    runs-on: windows-latest
+
+    steps:
+    
+    #- name: Find MSVC version (for nmake)
+    #  run: |
+    #    dir "C:\Program Files (x86)\Windows Kits\10\Lib"
+    #    dir "C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\um\x64"
+    #    dir "C:\Program Files (x86)\Windows Kits\10\bin"
+    #    dir "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC"
+    #    dir "C:\Windows\Microsoft.NET\Framework64\"
+
+    #- name: Add path to conda
+    #  run: |
+    #    Add-Content $env:GITHUB_PATH "$env:CONDA\Scripts"
+
+    #- name: Install libnetcdf
+    #  run: |
+    #    conda install -c conda-forge libnetcdf --yes
+    #    echo $env:LD_LIBRARY_PATH
+    #    echo $env:NetCDF_C_INCLUDE_DIR
+    #    echo $env:NetCDF_C_LIBRARY
+    #    Write-Output $env:PATH
+    #    conda install -c conda-forge libzlib libpng openjpeg
+
+    #- name: Dir
+    #  run: dir "$env:CONDA\lib\site-packages"
+
+    - name: Download Netcdf
+    # See https://docs.unidata.ucar.edu/netcdf-c/current/winbin.html
+      run: |
+        mkdir "$env:GITHUB_WORKSPACE\netcdf"
+        curl https://downloads.unidata.ucar.edu/netcdf-c/4.9.2/netCDF4.9.2-NC4-64.exe -o "$env:GITHUB_WORKSPACE\netcdf\netCDF-NC4-64.exe" 
+
+    - name: install Netcdf
+      run: |
+        cd "%GITHUB_WORKSPACE%\netcdf"
+        dir
+        netCDF-NC4-64.exe /S
+        dir
+      shell: cmd
+
+    - name: Add Netcdf to path
+      run: |
+        Add-Content $env:GITHUB_PATH "$env:GITHUB_WORKSPACE\netcdf"
+        Add-Content $env:GITHUB_PATH "$env:GITHUB_WORKSPACE\netcdf\bin"
+        Add-Content $env:GITHUB_PATH "$env:GITHUB_WORKSPACE\netcdf\lib"
+
+
+    - name: Download and extract source
+      uses: actions/checkout@v4
+      with:
+        # Repository name with owner. Default: ${{ github.repository }}
+        repository: ecmwf/eccodes
+        # The branch, tag or SHA to checkout. Otherwise, uses the default branch.
+        ref: release/2.35.0
+        # Relative path under $GITHUB_WORKSPACE to place the repositor
+        path: Source
+
+    - name: Download and extract ecbuild - ECMWF eccodes build system
+      uses: actions/checkout@v4
+      with:
+        # Repository name with owner. Default: ${{ github.repository }}
+        repository: ecmwf/ecbuild
+        # The branch, tag or SHA to checkout. Otherwise, uses the default branch.
+        # ref: ""
+        # Relative path under $GITHUB_WORKSPACE to place the repositor
+        path: ecbuild
+
+    - name: Add path to ECMWF eccodes build system
+      run: |
+        Add-Content $env:GITHUB_PATH "$env:GITHUB_WORKSPACE\ecbuild"
+        Add-Content $env:GITHUB_PATH "$env:CONDA\Library\bin"
+
+    - name: Set up Visual Studio
+      run: |
+        # set VSCMD_DEBUG=3
+        "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+      shell: cmd
+
+    - name: Add paths for Visual Studio   # the bat above is not fully working, so we manually add to PATH
+      run: |
+         Add-Content $env:GITHUB_PATH "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64"
+         Add-Content $env:GITHUB_PATH "C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\um\x64"
+         Add-Content $env:GITHUB_PATH "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.39.33519\bin\Hostx64\x64"
+         Add-Content $env:GITHUB_PATH "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE"
+         Add-Content $env:GITHUB_PATH "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TestWindow"
+         Add-Content $env:GITHUB_PATH "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
+         Add-Content $env:GITHUB_PATH "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\Extensions\Microsoft\IntelliCode\CLI"
+         Add-Content $env:GITHUB_PATH "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\VC\VCPackages"
+         Add-Content $env:GITHUB_PATH "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools"
+         Add-Content $env:GITHUB_PATH "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\bin\Roslyn"
+         Add-Content $env:GITHUB_PATH "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\amd64"
+         Add-Content $env:GITHUB_PATH "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Team Tools\Performance Tools"
+         Add-Content $env:GITHUB_PATH "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Team Tools\Performance Tools\x64"
+         Add-Content $env:GITHUB_PATH "C:\Windows\Microsoft.NET\Framework64\v4.0.30319"
+         echo "Visual Studio $env:VSCMD_VER"
+
+    - name: Build and install
+      run: |
+        echo %PATH%
+        cd %GITHUB_WORKSPACE%\Source
+        mkdir BUILD
+        cd BUILD
+        set EXTERNAL_INCLUDE=C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.39.33519\include;C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.39.33519\ATLMFC\include;C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\VS\include;C:\Program Files (x86)\Windows Kits\10\include\10.0.22621.0\ucrt;C:\Program Files (x86)\Windows Kits\10\\include\10.0.22621.0\\um;C:\Program Files (x86)\Windows Kits\10\\include\10.0.22621.0\\shared;C:\Program Files (x86)\Windows Kits\10\\include\10.0.22621.0\\winrt;C:\Program Files (x86)\Windows Kits\10\\include\10.0.22621.0\\cppwinrt;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\include\um
+        set LIB=C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.39.33519\ATLMFC\lib\x64;C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.39.33519\lib\x64;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\lib\um\x64;C:\Program Files (x86)\Windows Kits\10\lib\10.0.22621.0\ucrt\x64;C:\Program Files (x86)\Windows Kits\10\\lib\10.0.22621.0\\um\x64
+        set LIBPATH=C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.39.33519\ATLMFC\lib\x64;C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.39.33519\lib\x64;C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.39.33519\lib\x86\store\references;C:\Program Files (x86)\Windows Kits\10\UnionMetadata\10.0.22621.0;C:\Program Files (x86)\Windows Kits\10\References\10.0.22621.0;C:\Windows\Microsoft.NET\Framework64\v4.0.30319
+        set NetCDF_C_INCLUDE_DIR=C:\hostedtoolcache\windows\Python\3.9.13\Lib\site-packages\netCDF4.libs
+        cmake -G "NMake Makefiles" ^
+          -D CMAKE_INSTALL_PREFIX=C:\ECMWF ^
+          -D CMAKE_BUILD_TYPE=Release ^
+          -D ENABLE_FORTRAN=0 ^
+          -D ENABLE_NETCDF=1 ^
+          -D ENABLE_JPG=1 ^
+          -D ENABLE_AEC=0 ^
+          -D IEEE_LE=1 ^
+          -D ENABLE_MEMFS=1 ^
+          -D ENABLE_TESTS=0 ^
+          -D ENABLE_EXTRA_TESTS=OFF ^
+          ..
+        nmake install
+#        copy "%CONDA%\Library\bin\openjp2.dll" "%RUNNER_TEMP%\Install\bin\"
+#        copy "%CONDA%\Library\bin\libpng16.dll" "%RUNNER_TEMP%\Install\bin\"
+#        copy "%CONDA%\Library\bin\zlib.dll" %RUNNER_TEMP%\Install\bin\"
+      shell: cmd
+
+    - name: Run tests
+      run: |
+        "$env:RUNNER_TEMP\Install\bin\codes_info.exe"
+
+    - name: Package artifacts
+      run: |
+        cd C:\
+        7z a "%GITHUB_WORKSPACE%\EcCodes-win-x64.zip" "%RUNNER_TEMP%\Install"
+      shell: cmd
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: EcCodes-win-x64
+        path: EcCodes-win-x64.zip
