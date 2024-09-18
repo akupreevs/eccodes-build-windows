@@ -1,0 +1,89 @@
+name: EcCodes Windows Build
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Miniconda
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: 3.8
+          activate-environment: base
+          condarc-file: ${{ github.workspace }}/.condarc
+
+      # Step 3: Configure Git symlinks and activate Conda
+      - name: Configure Git and Conda
+        shell: cmd
+        run: |
+          git config --global core.symlinks true
+          call C:\Miniconda38-x64\Scripts\activate.bat
+          conda config --set always_yes yes
+
+      # Step 4: Download and extract source tarball
+      - name: Download and extract source
+        run: |
+          curl -o sources.tar.gz https://github.com/ecmwf/eccodes/archive/refs/tags/2.37.0.tar.gz
+          7z x -tgzip -so sources.tar.gz | 7z x -si -ttar
+
+      # Step 5: Install Linux utilities and required dependencies via Conda
+      - name: Install dependencies
+        run: |
+          conda install -c msys2 m2-bash m2-findutils m2-coreutils m2-grep m2-sed m2-gawk m2-diffutils m2-perl
+          conda install -c conda-forge cmake
+          conda install libpng openjpeg
+
+      # Step 6: Set up the MSVC environment for x64
+      - name: Set up MSVC environment
+        shell: cmd
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+
+      # Step 7: Configure the build with CMake
+      - name: Configure project with CMake
+        run: |
+          cd eccodes-2.37.0-Source
+          mkdir BUILD && cd BUILD
+          cmake -G "NMake Makefiles" -D CMAKE_INSTALL_PREFIX=C:/ECMWF -D CMAKE_BUILD_TYPE=Release -D ENABLE_FORTRAN=0 -D ENABLE_PYTHON=1 -D ENABLE_NETCDF=1 -D ENABLE_PNG=1 -D ENABLE_JPG=1 -D OPENJPEG_INCLUDE_DIR=C:/Miniconda38-x64/Library/include/openjpeg-2.3 -D IEEE_LE=1 -D ENABLE_EXAMPLES=0 -D ENABLE_MEMFS=0 -D ENABLE_TESTS=0 -D ENABLE_EXTRA_TESTS=OFF ..
+
+      # Step 8: Build the project
+      - name: Build project
+        run: |
+          cd eccodes-2.37.0-Source/BUILD
+          nmake install
+
+      # Step 9: Copy necessary DLLs to the installation directory
+      - name: Copy DLLs
+        run: |
+          copy C:\Miniconda38-x64\Library\bin\openjp2.dll C:\ECMWF\bin\
+          copy C:\Miniconda38-x64\Library\bin\libpng16.dll C:\ECMWF\bin\
+          copy C:\Miniconda38-x64\Library\bin\zlib.dll C:\ECMWF\bin\
+
+      # Step 10: Run test script
+      - name: Run tests
+        run: |
+          C:\ECMWF\bin\codes_info.exe
+
+      # Step 11: Archive the installation as a zip file
+      - name: Archive build artifacts
+        run: |
+          7z a ${{ github.workspace }}/EcCodes-win-x64.zip C:\ECMWF
+
+      # Step 12: Upload artifact
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: EcCodes-win-x64.zip
+          path: EcCodes-win-x64.zip
