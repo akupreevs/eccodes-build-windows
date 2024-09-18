@@ -1,12 +1,11 @@
 # eccodes-build-windows
 
-Automated ECMWF EcCodes library and tools builds for Windows [![Build status](https://ci.appveyor.com/api/projects/status/uc0igp7jhnu844tw?svg=true)](https://ci.appveyor.com/project/moonpyk/eccodes-build-windows)
-
+Automated ECMWF EcCodes library and tools builds for Windows [![Build status](https://ci.appveyor.com/api/projects/status/pekr8j0mwtdmjfsh?svg=true)](https://ci.appveyor.com/project/AlexanderKupreev/eccodes-build-windows)
 
 This repository is almost empty and consists mostly of an appveyor build file. 
 The original source code resides there : [https://github.com/ecmwf/eccodes](https://github.com/ecmwf/eccodes) (Apache 2 License)
 
-The stuff resides inside the [releases page](https://github.com/moonpyk/eccodes-build-windows/releases) where compiled binaries are available.
+The stuff resides inside the [releases page](https://github.com/AlexanderKupreev/eccodes-build-windows/releases) where compiled binaries are available.
 
 The build system compiles EcCodes with the following features enabled :
 
