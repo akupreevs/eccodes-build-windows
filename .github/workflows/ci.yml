@@ -131,7 +131,7 @@ jobs:
           -D ENABLE_TESTS=0 ^
           -D ENABLE_EXTRA_TESTS=OFF ^
           ..
-        nmake install
+        cmake install
 #        copy "%CONDA%\Library\bin\openjp2.dll" "%RUNNER_TEMP%\Install\bin\"
 #        copy "%CONDA%\Library\bin\libpng16.dll" "%RUNNER_TEMP%\Install\bin\"
 #        copy "%CONDA%\Library\bin\zlib.dll" %RUNNER_TEMP%\Install\bin\"
