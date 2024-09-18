@@ -21,7 +21,8 @@ jobs:
         with:
           # auto-update-conda: true
           python-version: 3.8
-          activate-environment: base
+          activate-environment: ''
+          auto-activate-base: true
           # condarc-file: ${{ github.workspace }}/.condarc
 
       # Step 3: Configure Git symlinks and activate Conda
