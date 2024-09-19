@@ -89,7 +89,6 @@ jobs:
         run: |
           set VSCMD_DEBUG=3
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" x64
-          where nmake
         shell: cmd
 
       # Step 11
@@ -110,6 +109,8 @@ jobs:
            Add-Content $env:GITHUB_PATH "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Team Tools\Performance Tools\x64"
            Add-Content $env:GITHUB_PATH "C:\Windows\Microsoft.NET\Framework64\v4.0.30319"
            echo "Visual Studio $env:VSCMD_VER"
+
+      - uses: ilammy/msvc-dev-cmd@v1
 
       # Step 12
       - name: Build and install
