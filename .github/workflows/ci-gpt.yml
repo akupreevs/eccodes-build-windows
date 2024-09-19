@@ -15,23 +15,23 @@ jobs:
       - name: Checkout the code
         uses: actions/checkout@v3
 
-      # Step 2
-      - name: Set up Miniconda
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          # auto-update-conda: true
-          # python-version: 3.8
-          activate-environment: ''
-          auto-activate-base: true
-          # condarc-file: ${{ github.workspace }}/.condarc
+      # # Step 2
+      # - name: Set up Miniconda
+      #   uses: conda-incubator/setup-miniconda@v2
+      #   with:
+      #     # auto-update-conda: true
+      #     # python-version: 3.8
+      #     activate-environment: ''
+      #     auto-activate-base: true
+      #     # condarc-file: ${{ github.workspace }}/.condarc
 
-      # Step 3
-      - name: Configure Git symlinks and activate Conda
-        shell: cmd
-        run: |
-          git config --global core.symlinks true
-          call C:\Miniconda38-x64\Scripts\activate.bat
-          conda config --set always_yes yes
+      # # Step 3
+      # - name: Configure Git symlinks and activate Conda
+      #   shell: cmd
+      #   run: |
+      #     git config --global core.symlinks true
+      #     call C:\Miniconda38-x64\Scripts\activate.bat
+      #     conda config --set always_yes yes
 
       # Step 4
       - name: Download Netcdf
