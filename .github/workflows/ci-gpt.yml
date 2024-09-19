@@ -13,7 +13,7 @@ jobs:
     steps:
       # Step 1
       - name: Checkout the code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # # Step 2
       # - name: Set up Miniconda
@@ -63,8 +63,8 @@ jobs:
           # Repository name with owner. Default: ${{ github.repository }}
           repository: ecmwf/eccodes
           # The branch, tag or SHA to checkout. Otherwise, uses the default branch.
-          ref: release/2.37.0
-          # Relative path under $GITHUB_WORKSPACE to place the repositor
+          ref: tag/2.37.0
+          # Relative path under $GITHUB_WORKSPACE to place the repository
           path: Source
 
       # Step 8
