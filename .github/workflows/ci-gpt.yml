@@ -63,7 +63,7 @@ jobs:
           # Repository name with owner. Default: ${{ github.repository }}
           repository: ecmwf/eccodes
           # The branch, tag or SHA to checkout. Otherwise, uses the default branch.
-          ref: tag/2.37.0
+          # ref: tag/2.37.0
           # Relative path under $GITHUB_WORKSPACE to place the repository
           path: Source
 
